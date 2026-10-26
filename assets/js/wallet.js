@@ -35,9 +35,14 @@ export async function getSession() {
   };
 }
 
-/** Re-open MetaMask's account picker so the user can choose a different account. */
+/**
+ * Let the user pick a different account.
+ * MetaMask keeps returning the previously connected account while it is still permitted,
+ * so drop the current permission first and then ask again — the picked account becomes the only one.
+ */
 export async function switchAccount() {
-  await window.ethereum.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
+  await disconnectWallet();
+  await window.ethereum.request({ method: "eth_requestAccounts" });
   return getSession();
 }
 

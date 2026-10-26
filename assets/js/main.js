@@ -151,6 +151,7 @@ async function onSwitchAccount() {
       ? "มีคำขอค้างอยู่ใน MetaMask แล้ว — เปิด MetaMask เพื่อทำต่อ"
       : toFriendlyError(err);
     view.renderFeedback("error", "ไม่ได้สลับบัญชี", { detail });
+    await loadSession(); // the old permission is already revoked — fall back to the gate if nothing is connected
   }
 }
 
