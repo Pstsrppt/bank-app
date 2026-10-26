@@ -15,6 +15,7 @@ const state = {
   bankWei: 0n,
   walletWei: 0n,
   busy: false,
+  walletBusy: false, // a MetaMask connect / switch prompt is open
 };
 
 const canTransact = () => !!state.bank && state.session?.isCorrectNetwork && !state.busy;
@@ -131,29 +132,36 @@ async function transact(kind) {
 
 /* ---------- Event wiring ---------- */
 
-async function onConnect() {
+const WALLET_BUTTONS = ["connectBtn", "gateConnect", "switchAccBtn", "disconnectBtn"];
+const isUserRejection = (err) => err?.code === 4001 || err?.code === "ACTION_REJECTED";
+
+/**
+ * Run a MetaMask prompt (connect / switch account) at most once at a time.
+ * The user cancelling is not an error — they know they cancelled, so stay quiet.
+ */
+async function walletAction(request, failTitle) {
+  if (state.walletBusy) return;
+  state.walletBusy = true;
+  WALLET_BUTTONS.forEach((id) => ($(id).disabled = true));
   try {
-    await connectWallet();
+    await request();
     setLoggedOut(false);
-    await loadSession();
-  } catch {
-    view.renderFeedback("error", "ยกเลิกการเชื่อมต่อ", { detail: "คุณปฏิเสธคำขอเชื่อมต่อใน MetaMask" });
+  } catch (err) {
+    if (err?.code === -32002) {
+      view.renderFeedback("error", failTitle, { detail: "มีหน้าต่าง MetaMask ค้างอยู่ — เปิด MetaMask เพื่อทำต่อ" });
+    } else if (!isUserRejection(err)) {
+      view.renderFeedback("error", failTitle, { detail: toFriendlyError(err) });
+    }
+  } finally {
+    state.walletBusy = false;
+    WALLET_BUTTONS.forEach((id) => ($(id).disabled = false));
   }
+  // Always re-sync: a cancelled switch has already revoked the old account, so this may show the gate.
+  await loadSession().catch(console.warn);
 }
 
-async function onSwitchAccount() {
-  try {
-    await switchAccount();
-    setLoggedOut(false);
-    await loadSession();
-  } catch (err) {
-    const detail = err?.code === -32002
-      ? "มีคำขอค้างอยู่ใน MetaMask แล้ว — เปิด MetaMask เพื่อทำต่อ"
-      : toFriendlyError(err);
-    view.renderFeedback("error", "ไม่ได้สลับบัญชี", { detail });
-    await loadSession(); // the old permission is already revoked — fall back to the gate if nothing is connected
-  }
-}
+const onConnect = () => walletAction(connectWallet, "เชื่อมต่อไม่สำเร็จ");
+const onSwitchAccount = () => walletAction(switchAccount, "สลับบัญชีไม่สำเร็จ");
 
 async function onDisconnect() {
   setLoggedOut(true);
