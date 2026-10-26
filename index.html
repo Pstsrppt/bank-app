@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bank DApp — CSI301 Assignment 5 (Sepolia + MetaMask)">
+  <title>Bank DApp</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script type="module" src="assets/js/main.js"></script>
+</head>
+<body>
+
+  <!-- Header: student identity (required) + wallet status -->
+  <header>
+    <div class="bar">
+      <div class="logo">฿</div>
+      <div class="who">
+        <b id="studentLine">Student ID: 66095681 | Name: Pongsathorn Siriprompitak</b>
+        <span id="studentSub"></span>
+      </div>
+      <span class="chip hidden" id="netChip"><span class="dot" id="netDot"></span><span id="netName">-</span></span>
+      <button class="chip hidden" id="addrChip" title="คลิกเพื่อคัดลอก address"><span class="dot ok"></span><span class="mono" id="addrShort">-</span></button>
+      <button class="btn btn-ghost btn-sm hidden" id="switchAccBtn" title="เลือกบัญชีอื่นใน MetaMask">⇄ สลับบัญชี</button>
+      <button class="btn btn-ghost btn-sm hidden" id="disconnectBtn" title="ยกเลิกการเชื่อมต่อกระเป๋า">ออกจากระบบ</button>
+      <button class="btn btn-navy" id="connectBtn">Connect Wallet</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Banners: surface problems before the user hits an error -->
+    <div class="banner err" id="noMetaMask">
+      <div class="grow">ไม่พบ MetaMask ในเบราว์เซอร์นี้ — ต้องติดตั้งก่อนจึงจะใช้งาน DApp ได้</div>
+      <a class="btn btn-ghost" href="https://metamask.io/download/" target="_blank" rel="noopener">ติดตั้ง MetaMask</a>
+    </div>
+    <div class="banner warn" id="wrongNet">
+      <div class="grow">กระเป๋าของคุณไม่ได้อยู่บนเครือข่าย <b>Sepolia</b> — Bank contract อยู่บน Sepolia เท่านั้น</div>
+      <button class="btn btn-navy" id="switchBtn">สลับไป Sepolia</button>
+    </div>
+    <div class="banner warn" id="noContract">
+      <div class="grow">ยังไม่ได้ตั้งค่า Contract Address — แก้ค่าใน <span class="mono">assets/js/config.js</span></div>
+    </div>
+
+    <!-- State 1: Locked gate -->
+    <section class="gate" id="gate">
+      <div class="lock">🔒</div>
+      <h1>เชื่อมต่อกระเป๋าเพื่อเข้าใช้งาน</h1>
+      <p>ระบบจะรู้ว่าคุณคือใครจาก address ของ MetaMask (msg.sender)<br>ไม่ต้องสมัครสมาชิกหรือตั้งรหัสผ่าน</p>
+      <button class="btn btn-navy btn-lg" id="gateConnect">Connect Wallet</button>
+      <div class="steps"><span>1 · Connect</span><span>2 · ฝาก / ถอน</span><span>3 · ยืนยันใน MetaMask</span></div>
+    </section>
+
+    <!-- State 2: Dashboard -->
+    <section id="app" class="hidden">
+      <div class="grid">
+        <div class="stack">
+          <!-- Balance (CheckBlance) -->
+          <div class="card">
+            <h2>ยอดเงินในธนาคาร (Bank Balance)</h2>
+            <div class="balance">
+              <div>
+                <div class="big"><span id="bankBal">0</span> <small>ETH</small></div>
+                <span class="free">✓ CheckBalance อ่านค่าฟรี ไม่เสีย Gas</span>
+              </div>
+              <button class="btn btn-ghost" id="refreshBtn">↻ Refresh</button>
+            </div>
+            <div class="wallet-row"><span class="sub">ยอดในกระเป๋า MetaMask</span><b><span id="walletBal">0</span> ETH</b></div>
+          </div>
+
+          <!-- Interaction (Deposit / Withdraw) -->
+          <div class="card">
+            <label for="amount">Amount (จำนวนเงิน)</label>
+            <div class="amount">
+              <input id="amount" type="number" inputmode="decimal" min="0" step="0.0001" placeholder="0.00">
+              <span class="unit">ETH</span>
+            </div>
+            <div class="quick" id="quickAmounts"></div>
+            <div class="hint" id="hint">กรอกจำนวนเงินแล้วเลือก Deposit หรือ Withdraw</div>
+            <div class="actions">
+              <button class="btn btn-green" id="depositBtn" disabled>Deposit<small>ฝากจากกระเป๋า → ธนาคาร</small></button>
+              <button class="btn btn-orange" id="withdrawBtn" disabled>Withdraw<small>ถอนจากธนาคาร → กระเป๋า</small></button>
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback idle" id="feedback" aria-live="polite">สถานะธุรกรรมจะแสดงที่นี่</div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <!-- History (from contract events) -->
+          <div class="card">
+            <h2>ประวัติธุรกรรมของฉัน (จาก Event บนบล็อกเชน)</h2>
+            <ul class="history" id="history"><li class="empty">ยังไม่มีรายการ</li></ul>
+          </div>
+          <!-- Connection info -->
+          <div class="card">
+            <h2>ข้อมูลการเชื่อมต่อ</h2>
+            <table class="info-table">
+              <tr><td>Network</td><td id="infoNet">-</td></tr>
+              <tr><td>My Address</td><td class="mono break" id="infoAddr">-</td></tr>
+              <tr><td>Bank Contract</td><td class="mono break" id="infoContract">-</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>CSI301 Blockchain · Sripatum University · GitHub Pages → MetaMask → Bank Smart Contract (Sepolia)</footer>
+</body>
+</html>
