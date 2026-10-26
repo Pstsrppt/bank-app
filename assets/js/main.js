@@ -146,8 +146,11 @@ async function onSwitchAccount() {
     await switchAccount();
     setLoggedOut(false);
     await loadSession();
-  } catch {
-    view.renderFeedback("error", "ไม่ได้สลับบัญชี", { detail: "คุณยกเลิกการเลือกบัญชีใน MetaMask" });
+  } catch (err) {
+    const detail = err?.code === -32002
+      ? "มีคำขอค้างอยู่ใน MetaMask แล้ว — เปิด MetaMask เพื่อทำต่อ"
+      : toFriendlyError(err);
+    view.renderFeedback("error", "ไม่ได้สลับบัญชี", { detail });
   }
 }
 

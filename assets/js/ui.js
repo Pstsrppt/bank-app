@@ -2,7 +2,7 @@
  * UI layer — pure rendering helpers. No blockchain calls in this file.
  */
 import { ethers } from "./vendor.js";
-import { CONTRACT, NETWORK, STUDENT } from "./config.js";
+import { CONTRACT, NETWORK, STUDENT, UI } from "./config.js";
 
 export const $ = (id) => document.getElementById(id);
 export const formatEth = (wei) =>
@@ -10,6 +10,8 @@ export const formatEth = (wei) =>
 export const shorten = (s) => `${s.slice(0, 6)}…${s.slice(-4)}`;
 
 const txUrl = (hash) => `${NETWORK.explorer}/tx/${hash}`;
+const formatTime = (sec) =>
+  sec ? new Date(sec * 1000).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" }) : "";
 const show = (id, visible) => $(id).classList.toggle("hidden", !visible);
 const banner = (id, visible) => $(id).classList.toggle("show", visible);
 
@@ -87,18 +89,20 @@ export function renderFeedback(type, title, { detail = "", step = 0, hash } = {}
   }).join("");
 
   const icon = { pending: '<span class="spin"></span>', success: "✅ ", error: "⚠️ " }[type] ?? "";
+  const showSteps = type !== "idle" && step !== 0; // step 0 = not a transaction (e.g. wallet errors)
   const link = hash
     ? `Tx: <a class="mono" href="${txUrl(hash)}" target="_blank" rel="noopener">${shorten(hash)}</a> · ดูบน Etherscan`
     : "";
 
   box.innerHTML = `
     <b>${icon}${title}</b>
-    ${type !== "idle" ? `<div class="tx-steps">${bars}</div>` : ""}
+    ${showSteps ? `<div class="tx-steps">${bars}</div>` : ""}
     <div class="sub">${detail || link}</div>`;
 }
 
 export function renderHistory(rows) {
   const list = $("history");
+  $("historyNote").textContent = `${UI.historyLimit} รายการล่าสุด`;
   if (rows === null) {
     list.innerHTML = '<li class="empty">โหลดประวัติไม่สำเร็จ</li>';
     return;
@@ -112,7 +116,10 @@ export function renderHistory(rows) {
     return `
       <li>
         <span class="tag ${isDeposit ? "dep" : "wd"}">${isDeposit ? "Deposit" : "Withdraw"}</span>
-        <a class="mono sub" href="${txUrl(r.hash)}" target="_blank" rel="noopener">${shorten(r.hash)}</a>
+        <div class="tx-meta">
+          <a class="mono sub" href="${txUrl(r.hash)}" target="_blank" rel="noopener">${shorten(r.hash)}</a>
+          <span class="sub">${formatTime(r.timestamp)}</span>
+        </div>
         <span class="amt">${isDeposit ? "+" : "−"}${formatEth(r.amount)} ETH</span>
       </li>`;
   }).join("");

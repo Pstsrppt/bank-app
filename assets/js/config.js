@@ -22,4 +22,5 @@ export const NETWORK = {
 export const UI = {
   quickAmounts: ["0.001", "0.005", "0.01"],
   historyLookbackBlocks: 9000,
+  historyLimit: 10, // show only the N most recent transactions
 };

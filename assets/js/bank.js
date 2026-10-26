@@ -22,7 +22,7 @@ export function createBank(signer) {
 
     withdraw: (wei) => contract.withdraw(wei),
 
-    /** Deposit/Withdraw events for one account, newest first. */
+    /** The latest `UI.historyLimit` Deposit/Withdraw events for one account, newest first, with block time. */
     async getHistory(account, provider) {
       const latest = await provider.getBlockNumber();
       const from = CONTRACT.deployBlock || Math.max(0, latest - UI.historyLookbackBlocks);
@@ -30,10 +30,15 @@ export function createBank(signer) {
         contract.queryFilter(contract.filters.Deposit(account), from, latest),
         contract.queryFilter(contract.filters.Withdraw(account), from, latest),
       ]);
-      return [
+      const rows = [
         ...deposits.map((e) => ({ type: "deposit", amount: e.args.amount, hash: e.transactionHash, block: e.blockNumber, index: e.index })),
         ...withdrawals.map((e) => ({ type: "withdraw", amount: e.args.amount, hash: e.transactionHash, block: e.blockNumber, index: e.index })),
-      ].sort((a, b) => b.block - a.block || b.index - a.index);
+      ].sort((a, b) => b.block - a.block || b.index - a.index).slice(0, UI.historyLimit);
+
+      // Events carry no timestamp — look up each distinct block once.
+      const blocks = [...new Set(rows.map((r) => r.block))];
+      const times = new Map(await Promise.all(blocks.map(async (n) => [n, (await provider.getBlock(n))?.timestamp])));
+      return rows.map((r) => ({ ...r, timestamp: times.get(r.block) }));
     },
   };
 }

@@ -92,6 +92,7 @@ label{font-weight:600;font-size:14px}
 .tag.dep{background:var(--green-soft);color:var(--green)}
 .tag.wd{background:var(--orange-soft);color:var(--orange)}
 .history .amt{margin-left:auto;font-weight:600}
+.tx-meta{display:flex;flex-direction:column;gap:2px;font-size:12px}
 .empty{color:var(--muted);font-size:14px;text-align:center;padding:24px 0}
 .info-table{width:100%;font-size:13px;border-collapse:collapse;margin-top:6px}
 .info-table td{padding:6px 0;border-bottom:1px solid var(--line)}
