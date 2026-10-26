@@ -102,7 +102,7 @@ export function renderFeedback(type, title, { detail = "", step = 0, hash } = {}
 
 export function renderHistory(rows) {
   const list = $("history");
-  $("historyNote").textContent = `${UI.historyLimit} รายการล่าสุด`;
+  $("historyNote").textContent = `${UI.historyLimit} รายการล่าสุด · จาก Event บนบล็อกเชน`;
   if (rows === null) {
     list.innerHTML = '<li class="empty">โหลดประวัติไม่สำเร็จ</li>';
     return;
