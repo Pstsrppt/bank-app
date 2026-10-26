@@ -21,10 +21,20 @@
         <b id="studentLine">Student ID: 66095681 | Name: Pongsathorn Siriprompitak</b>
         <span id="studentSub"></span>
       </div>
-      <span class="chip hidden" id="netChip"><span class="dot" id="netDot"></span><span id="netName">-</span></span>
-      <button class="chip hidden" id="addrChip" title="คลิกเพื่อคัดลอก address"><span class="dot ok"></span><span class="mono" id="addrShort">-</span></button>
-      <button class="btn btn-ghost btn-sm hidden" id="switchAccBtn" title="เลือกบัญชีอื่นใน MetaMask">⇄ สลับบัญชี</button>
-      <button class="btn btn-ghost btn-sm hidden" id="disconnectBtn" title="ยกเลิกการเชื่อมต่อกระเป๋า">ออกจากระบบ</button>
+      <!-- Account menu: one control for network, address and account actions -->
+      <div class="account hidden" id="account">
+        <button class="account-btn" id="accountBtn" aria-haspopup="menu" aria-expanded="false">
+          <span class="net"><span class="dot" id="netDot"></span><span id="netName">-</span></span>
+          <span class="mono" id="addrShort">-</span>
+          <svg class="caret" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="menu hidden" id="accountMenu" role="menu">
+          <button role="menuitem" id="copyAddrBtn">คัดลอก address</button>
+          <button role="menuitem" id="switchAccBtn">สลับบัญชี</button>
+          <hr>
+          <button role="menuitem" class="danger" id="disconnectBtn">ออกจากระบบ</button>
+        </div>
+      </div>
       <button class="btn btn-navy" id="connectBtn">Connect Wallet</button>
     </div>
   </header>

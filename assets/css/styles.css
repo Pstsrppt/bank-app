@@ -30,7 +30,20 @@ header{background:var(--surface);border-bottom:1px solid var(--line);position:st
 .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
 .btn-green{background:var(--green);color:#fff}
 .btn-orange{background:var(--orange);color:#fff}
-.btn-sm{padding:6px 12px;font-size:13px}
+
+/* Account menu (header) */
+.account{position:relative}
+.account-btn{display:inline-flex;align-items:center;gap:10px;padding:5px 10px 5px 5px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:13px;transition:border-color .15s,box-shadow .15s}
+.account-btn:hover,.account-btn[aria-expanded="true"]{border-color:#c9cec5;box-shadow:0 1px 4px rgba(20,30,40,.08)}
+.account-btn .net{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--bg);color:var(--muted)}
+.account-btn .caret{color:var(--muted);transition:transform .15s}
+.account-btn[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.menu{position:absolute;right:0;top:calc(100% + 6px);min-width:190px;padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);z-index:10}
+.menu button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:8px;background:transparent;color:var(--ink);font-size:14px}
+.menu button:hover{background:var(--bg)}
+.menu button.danger{color:var(--red)}
+.menu button.danger:hover{background:var(--red-soft)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
 
 main{max-width:980px;margin:0 auto;padding:20px 16px 48px}
 .banner{display:none;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:14px}

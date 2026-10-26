@@ -27,15 +27,19 @@ export function renderBanners({ noMetaMask = false, wrongNetwork = false, notCon
   banner("noContract", notConfigured);
 }
 
+/** Open/close the header account menu (`open` omitted = toggle). */
+export function toggleAccountMenu(open = $("accountMenu").classList.contains("hidden")) {
+  show("accountMenu", open);
+  $("accountBtn").setAttribute("aria-expanded", String(open));
+}
+
 /** State 1 — locked gate. */
 export function renderLocked() {
   show("gate", true);
   show("app", false);
   show("connectBtn", true);
-  show("addrChip", false);
-  show("netChip", false);
-  show("switchAccBtn", false);
-  show("disconnectBtn", false);
+  show("account", false);
+  toggleAccountMenu(false);
 }
 
 /** State 2 — unlocked dashboard. */
@@ -43,10 +47,7 @@ export function renderUnlocked(session) {
   show("gate", false);
   show("app", true);
   show("connectBtn", false);
-  show("addrChip", true);
-  show("netChip", true);
-  show("switchAccBtn", true);
-  show("disconnectBtn", true);
+  show("account", true);
 
   const ok = session.isCorrectNetwork;
   $("addrShort").textContent = shorten(session.account);

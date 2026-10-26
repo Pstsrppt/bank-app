@@ -190,7 +190,17 @@ function bindEvents() {
     validate();
   });
 
-  $("addrChip").addEventListener("click", async () => {
+  $("accountBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    view.toggleAccountMenu();
+  });
+  // Any click on a menu item or outside the menu closes it; Esc too.
+  document.addEventListener("click", (e) => {
+    if (!$("accountMenu").contains(e.target) || e.target.closest("[role=menuitem]")) view.toggleAccountMenu(false);
+  });
+  document.addEventListener("keydown", (e) => e.key === "Escape" && view.toggleAccountMenu(false));
+
+  $("copyAddrBtn").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(state.session.account);
       $("addrShort").textContent = "คัดลอกแล้ว ✓";
