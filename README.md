@@ -5,7 +5,7 @@ Web3 DApp สำหรับฝาก ถอน และเช็กยอด�
 > **CSI301 Blockchain — Assignment 5**
 > Student ID: **66095681** · Name: **Pongsathorn Siriprompitak** (พงศธร ศิริพรหมพิทักษ์)
 
-**Live demo:** `https://<username>.github.io/<repo>/`
+**Live demo:** https://pstsrppt.github.io/bank-app/
 
 ## Features
 
